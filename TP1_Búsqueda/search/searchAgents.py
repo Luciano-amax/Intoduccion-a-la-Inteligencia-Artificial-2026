@@ -480,20 +480,22 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    position, foodGrid = state # (posicion del pacman, grilla con comida)
     remaining_food = foodGrid.asList()
-    if not remaining_food:
-        return 0
+    if not remaining_food: # Caso base
+        return 0 # Si no queda comida, el costo es 0
 
     distance_cache = problem.heuristicInfo.setdefault('mazeDistances', {})
+    # Guardamos distancias ya calculadas para no repetir trabajo
 
-    def cached_maze_distance(point1, point2):
+    def cached_maze_distance(point1, point2): # Si ya habiamos calculado la distancia, la reutilizamos. Sino uso mazeDistance
         key = tuple(sorted((point1, point2)))
         if key not in distance_cache:
             distance_cache[key] = mazeDistance(point1, point2, problem.startingGameState)
         return distance_cache[key]
 
     return max(cached_maze_distance(position, food) for food in remaining_food)
+    # Calcula la distancia a cada comida, se queda con la mas lejana
 
 
 class ClosestDotSearchAgent(SearchAgent):

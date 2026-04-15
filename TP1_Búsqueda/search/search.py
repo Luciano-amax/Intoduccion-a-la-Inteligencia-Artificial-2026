@@ -89,59 +89,70 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    start_state = problem.getStartState()
+    start_state = problem.getStartState() # Estado inicial
     if problem.isGoalState(start_state):
-        return []
+        return [] # Si el estado inicial es el objetivo devuelvo lista vacia
 
-    frontier = util.Stack()
-    frontier.push((start_state, []))
-    visited = set()
+    frontier = util.Stack() # Pila
+    frontier.push((start_state, [])) # Guardo tuplas (estado,camino)
+    visited = set() # Para no repetir estados (es un conjunto)
 
-    while not frontier.isEmpty():
-        state, path = frontier.pop()
-        if state in visited:
+    while not frontier.isEmpty(): # Mientras haya nodo que visitar
+        state, path = frontier.pop() # Sacamos el ultimo agregado
+        if state in visited: # Si fue visitado antes, se ignora
             continue
 
-        visited.add(state)
+        visited.add(state) # Estado ya explorado
 
-        if problem.isGoalState(state):
+        if problem.isGoalState(state): # Si resolvi, devuelvo camino
             return path
-
+        
+        """
+        successor = nuevo estado
+        action = como llegue hasta ese punto
+        _ = costo  
+        """
         for successor, action, _ in problem.getSuccessors(state):
-            if successor not in visited:
-                frontier.push((successor, path + [action]))
+            if successor not in visited: # Evito meter estados ya visitados
+                frontier.push((successor, path + [action])) # Lo agregamos a la pila y guardo camino actualizado
 
-    return []
+    return [] # No se encontro el objetivo
 
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
-    start_state = problem.getStartState()
+    start_state = problem.getStartState()  # Estado inicial
     if problem.isGoalState(start_state):
-        return []
+        return [] # Si el estado inicial es el objetivo devuelvo lista vacia
 
-    frontier = util.Queue()
-    frontier.push((start_state, []))
-    visited = {start_state}
+    frontier = util.Queue() # Cola
+    frontier.push((start_state, [])) # Guardamos estado inical a la cola
+    visited = {start_state} # Conjunto de visitados, marcamos incial como visitado para no repetir
 
-    while not frontier.isEmpty():
-        state, path = frontier.pop()
+    while not frontier.isEmpty(): # Mientras haya nodo por explorar
+        state, path = frontier.pop() # Sacamos el primer elemento de la cola
 
-        if problem.isGoalState(state):
-            return path
+        if problem.isGoalState(state): # Chequeo si el estado es el objetivo
+            return path # Devolvemos el camino encontrado
 
+        """
+        successor = nuevo estado
+        action = como llegue hasta ese punto
+        _ = costo  
+        """
         for successor, action, _ in problem.getSuccessors(state):
-            if successor in visited:
-                continue
-            visited.add(successor)
-            frontier.push((successor, path + [action]))
+            if successor in visited: 
+                continue # Si ya visitamos, lo ignoramos (salteamos de iteracion)
+            visited.add(successor) # Marcamos al sucesor como visitado
+            frontier.push((successor, path + [action])) # Lo agregamos a la cola y guardo camino actualizado
 
-    return []
+    return [] # Si no encontramos nada, devolvemos lista vacia
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
-    frontier = util.PriorityQueue()
-    start_state = problem.getStartState()
-    frontier.push((start_state, [], 0), 0)
+    frontier = util.PriorityQueue() # Cola de prioridad
+    start_state = problem.getStartState() # Estado inicial
+    frontier.push((start_state, [], 0), 0) # Metemos estado incial en la cola de prioridad
+    # (estado incial, camino vacio, costo acumulado)
 
     best_costs = {start_state: 0}
     expanded_costs = {}
@@ -152,15 +163,24 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
         if cost > best_costs.get(state, float('inf')):
             continue
 
-        if problem.isGoalState(state):
-            return path
+        if problem.isGoalState(state): # Chequeo si el estado es el objetivo
+            return path # Devolvemos el camino encontrado
 
         if state in expanded_costs and expanded_costs[state] <= cost:
             continue
         expanded_costs[state] = cost
 
+        '''
+        successor = siguiente estado
+        action = movimiento hecho
+        step_cost = costo de ese paso
+        '''
         for successor, action, step_cost in problem.getSuccessors(state):
             new_cost = cost + step_cost
+            '''
+            cost -> g(n) donde n = actual
+            new_cost -> g(n) donde n = sucesor
+            ''' 
             if new_cost < best_costs.get(successor, float('inf')):
                 best_costs[successor] = new_cost
                 frontier.push((successor, path + [action], new_cost), new_cost)
@@ -179,16 +199,19 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
     frontier = util.PriorityQueue()
     start_state = problem.getStartState()
     frontier.push((start_state, [], 0), heuristic(start_state, problem))
+    # Seria como push (item, prioridad) donde item = estado, path, costo
 
     best_costs = {start_state: 0}
-    expanded_costs = {}
+    expanded_costs = {}  
 
-    while not frontier.isEmpty():
-        state, path, cost = frontier.pop()
+    while not frontier.isEmpty(): # Mientras haya nodo sigo buscando
+        state, path, cost = frontier.pop() # Saco nodo para procesar
 
-        if cost > best_costs.get(state, float('inf')):
+        if cost > best_costs.get(state, float('inf')): 
             continue
-
+            '''
+            costo actual > mejor  costo conocido
+            '''
         if problem.isGoalState(state):
             return path
 
@@ -200,10 +223,11 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
             new_cost = cost + step_cost
             if new_cost < best_costs.get(successor, float('inf')):
                 best_costs[successor] = new_cost
-                priority = new_cost + heuristic(successor, problem)
+                priority = new_cost + heuristic(successor, problem) # f(n) = g(n) + h(n)
                 frontier.push((successor, path + [action], new_cost), priority)
 
     return []
+
 
 # Abbreviations
 bfs = breadthFirstSearch
