@@ -95,14 +95,10 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
 
     frontier = util.Stack() # Pila
     frontier.push((start_state, [])) # Guardo tuplas (estado,camino)
-    visited = set() # Para no repetir estados (es un conjunto)
+    visited = {start_state} # Para no repetir estados (es un conjunto)
 
     while not frontier.isEmpty(): # Mientras haya nodo que visitar
         state, path = frontier.pop() # Sacamos el ultimo agregado
-        if state in visited: # Si fue visitado antes, se ignora
-            continue
-
-        visited.add(state) # Estado ya explorado
 
         if problem.isGoalState(state): # Si resolvi, devuelvo camino
             return path
@@ -114,6 +110,7 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
         """
         for successor, action, _ in problem.getSuccessors(state):
             if successor not in visited: # Evito meter estados ya visitados
+                visited.add(successor) # Marcamos como visitado
                 frontier.push((successor, path + [action])) # Lo agregamos a la pila y guardo camino actualizado
 
     return [] # No se encontro el objetivo
